@@ -418,3 +418,128 @@ ls -l  /usr/bin  >  ls-output.txt 创建一个/usr/bin的ls命令的结果，重
 [me@linuxbox ~]$ ls -l /usr/bin >> ls-output.txt //追加文件内容到后面，而不是开头重写。使用”>>“操作符，将导致输出结果添加到文件内容之后。如果文件不存在，文件会 被创建，就如使用了”>”操作符。
 ```
 
+
+
+标准错误重定向没有专用的重定向操作符。为了重定向标准错误，我们必须参考其文件描述符。 一个程序可以在几个编号的文件流中的任一个上产生输出。虽然我们已经将这些文件流的前 三个称作标准输入、输出和错误，shell 内部分别将其称为文件描述符0、1和2。shell 使用文件描述符提供 了一种表示法来重定向文件。因为标准错误和文件描述符2一样，我们用这种 表示法来重定向标准错误：
+
+```
+[me@linuxbox ~]$ ls -l /bin/usr 2> ls-error.txt
+```
+
+
+
+可能有这种情况，我们希望捕捉一个命令的所有输出到一个文件。为了完成这个，我们 必须同时重定向标准输出和标准错误。有两种方法来完成任务。第一个，传统的方法， 在旧版本 shell 中也有效： 
+
+```
+[me@linuxbox ~]$ ls -l /bin/usr > ls-output.txt 2>&1
+```
+
+注意重定向的顺序安排非常重要。标准错误的重定向必须总是出现在标准输出 重定向之后，要不然它不起作用。上面的例子，
+
+```
+>ls-output.txt 2>&1
+```
+
+重定向标准错误到文件 ls-output.txt，但是如果命令顺序改为：
+
+```
+2>&1 >ls-output.txt
+```
+
+则标准错误定向到屏幕。
+
+
+
+我们不想要一个命令的输出结果，只想把它们扔掉。这种情况 尤其适用于错误和状态信息。系统通过重定向输出结果到一个叫做”/dev/null”的特殊文件， 为我们提供了解决问题的方法。这个文件是系统设备，叫做位存储桶，它可以 接受输入，并且对输入不做任何处理。为了隐瞒命令错误信息，我们这样做：
+
+```
+[me@linuxbox ~]$ ls -l /bin/usr 2> /dev/null
+```
+
+
+
+```
+cat [file]  //cat 命令读取一个或多个文件，然后复制它们到标准输出
+```
+
+```
+[me@linuxbox ~]$ cat > lazydog.txt  //创建一个叫lazydog的文件，并输入数据
+```
+
+
+
+```
+command1 | command2  //命令从标准输入读取数据并输送到标准输出的能力被一个称为管道线的 shell 特性所利用。 使用管道操作符”|”（竖杠），一个命令的标准输出可以通过管道送至另一个命令的标准输入
+```
+
+```
+[me@linuxbox ~]$ ls -l /usr/bin | less
+```
+
+```
+[me@linuxbox ~]$ ls /bin /usr/bin | sort | less //起到过滤器的作用
+```
+
+```
+[me@linuxbox ~]$ ls /bin /usr/bin | sort | uniq | less //unique删除重复行
+[me@linuxbox ~]$ ls /bin /usr/bin | sort | uniq -d| less //显示重复数据列表
+```
+
+
+
+```
+[me@linuxbox ~]$ wc ls-output.txt  //打印行数、字数和字节数
+7902 64566 503634 ls-output.txt
+```
+
+wc -l 只显示行数
+
+
+
+grep pattern [file...] 打印匹配模式匹配到的内容
+
+```
+[me@linuxbox ~]$ ls /bin /usr/bin | sort | uniq | grep zip
+bunzip2
+bzip2
+gunzip
+...
+```
+
+grep 有一些方便的选项：”-i”使得 grep 在执行搜索时忽略大小写（通常，搜索是大小写 敏感的），”-v”选项会告诉 grep 只打印不匹配的行。 
+
+
+
+ head 命令打印文件的前十行，而 tail 命令打印文件的后十行。默认情况下，两个命令 都打印十行文本，但是可以通过”-n”选项来调整命令打印的行数。
+
+```
+[me@linuxbox ~]$ head -n 5 ls-output.txt
+total 343496
+...
+[me@linuxbox ~]$ tail -n 5 ls-output.txt
+...
+```
+
+
+
+tail 有一个选项允许你实时地浏览文件。当观察日志文件的进展时，这很有用，因为 它们同时在被写入。在以下的例子里，我们要查看目录/var/log 里面的信息文件。在 一些 Linux 发行版中，要求有超级用户权限才能阅读这些文件，因为文件/var/log/messages 可能包含安全信息。
+
+```
+[me@linuxbox ~]$ tail -f /var/log/messages
+Feb 8 13:40:05 twin4 dhclient: DHCPACK from 192.168.1.1
+....
+```
+
+使用”-f”选项，tail 命令继续监测这个文件，当新的内容添加到文件后，它们会立即 出现在屏幕上。这会一直继续下去直到你输入 Ctrl-c。
+
+
+
+tee 程序从标准输入读入数据，并且同时复制数据 到标准输出（允许数据继续随着管道线流动）和一个或多个文件。当在某个中间处理 阶段来捕捉一个管道线的内容时，这很有帮助。这里，我们重复执行一个先前的例子， 这次包含 tee 命令，在 grep 过滤管道线的内容之前，来捕捉整个目录列表到文件 ls.txt：
+
+```
+[me@linuxbox ~]$ ls /usr/bin | tee ls.txt | grep zip
+bunzip2
+bzip2
+....
+```
+
