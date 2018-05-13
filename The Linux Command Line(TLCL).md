@@ -543,3 +543,186 @@ bzip2
 ....
 ```
 
+
+
+echo  something   打印something
+
+```
+[me@linuxbox ~]$ echo [[:upper:]]*
+Desktop Documents Music Pictures Public Templates Videos
+```
+
+```
+[me@linuxbox ~]$ echo D*
+Desktop  Documents
+```
+
+```
+[me@linuxbox ~]$ echo *s
+Documents Pictures Templates Videos
+```
+
+
+
+波浪线字符(“~”)有特殊的含义。当它用在 一个单词的开头时，它会展开成指定用户的家目录名，如果没有指定用户名，则展开成当前用户的家目录：
+
+```
+[me@linuxbox ~]$ echo ~
+/home/me
+```
+
+如果有用户”foo”这个帐号，那么：
+
+```
+[me@linuxbox ~]$ echo ~foo
+/home/foo
+```
+
+shell 在展开中执行算数表达式。这允许我们把 shell 提示当作计算器来使用：
+
+```
+[me@linuxbox ~]$ echo $((2 + 2))
+4
+```
+
+算术表达式展开使用这种格式：
+
+```
+$((expression))
+```
+
+| 操作符 | 说明                                                       |
+| ------ | ---------------------------------------------------------- |
+| +      | 加                                                         |
+| -      | 减                                                         |
+| *      | 乘                                                         |
+| /      | 除（但是记住，因为展开只是支持整数除法，所以结果是整数。） |
+| %      | 取余，只是简单的意味着，“余数”                             |
+| **     | 取幂                                                       |
+
+5的平方乘以3：
+
+```
+[me@linuxbox ~]$ echo $(($((5**2)) * 3))
+75
+```
+
+花括号展开。通过它，你可以从一个包含花括号的模式中 创建多个文本字符串。这是一个例子：
+
+```
+[me@linuxbox ~]$ echo Front-{A,B,C}-Back
+Front-A-Back Front-B-Back Front-C-Back
+```
+
+花括号展开模式可能包含一个开头部分叫做报头，一个结尾部分叫做附言。花括号表达式本身可 能包含一个由逗号分开的字符串列表，或者一系列的整数，或者单个的字符串。这种模式不能 嵌入空白字符。
+
+```
+[me@linuxbox ~]$ echo Number_{1..5}
+Number_1  Number_2  Number_3  Number_4  Number_5
+```
+
+一系列以倒序排列的字母：
+
+```
+[me@linuxbox ~]$ echo {Z..A}
+Z Y X W V U T S R Q P O N M L K J I H G F E D C B A
+```
+
+花括号展开可以嵌套：
+
+```
+[me@linuxbox ~]$ echo a{A{1,2},B{3,4}}b
+aA1b aA2b aB3b aB4b
+```
+
+常见的应用是，创建一系列的文件或目录列表。例如， 如果我们是摄影师，有大量的相片。我们想把这些相片按年月先后组织起来。首先， 我们要创建一系列以数值”年－月”形式命名的目录。通过这种方式，可以使目录名按照 年代顺序排列。我们可以手动键入整个目录列表，但是工作量太大了，并且易于出错。 反之，我们可以这样做：
+
+```
+[me@linuxbox ~]$ mkdir Pics
+[me@linuxbox ~]$ cd Pics
+[me@linuxbox Pics]$ mkdir {2007..2009}-0{1..9} {2007..2009}-{10..12}
+[me@linuxbox Pics]$ ls
+2007-01 2007-07 2008-01 2008-07 2009-01 2009-07
+2007-02 2007-08 2008-02 2008-08 2009-02 2009-08
+2007-03 2007-09 2008-03 2008-09 2009-03 2009-09
+2007-04 2007-10 2008-04 2008-10 2009-04 2009-10
+2007-05 2007-11 2008-05 2008-11 2009-05 2009-11
+2007-06 2007-12 2008-06 2008-12 2009-06 2009-12
+```
+
+参数展开这个特性在 shell 脚本中比直接在命令行中更有用。 它的许多功能和系统存储小块数据，并给每块数据命名的能力有关系。许多像这样的小块数据， 更恰当的称呼应该是变量，可供你方便地检查它们。例如，叫做”USER”的变量包含你的 用户名。可以这样做来调用参数，并查看 USER 中的内容，：
+
+```
+[me@linuxbox ~]$ echo $USER
+me
+```
+
+命令替换允许我们把一个命令的输出作为一个展开模式来使用：
+
+```
+[me@linuxbox ~]$ echo $(ls)
+Desktop Documents ls-output.txt Music Pictures Public Templates
+Videos
+```
+
+```
+[me@linuxbox ~]$ ls -l $(which cp)
+-rwxr-xr-x 1 root root 71516 2007-12-05 08:58 /bin/cp
+```
+
+```
+[me@linuxbox ~]$ echo The total is $100.00  //变量1没有定义
+The total is 00.00
+[me@linuxbox ~]$ echo this is a    test  //shell会自动切除多余空格
+this is a test
+```
+
+
+
+使用双引号，我们可以阻止单词分割，得到期望的结果；进一步，我们甚至可以修复破损的文件名。
+
+```
+[me@linuxbox ~]$ ls -l "two words.txt"
+-rw-rw-r-- 1 me   me   18 2008-02-20 13:03 two words.txt
+[me@linuxbox ~]$ mv "two words.txt" two_words.txt
+```
+
+
+
+
+
+```
+[me@linuxbox ~]$ echo $(cal)
+February 2008 Su Mo Tu We Th Fr Sa 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+15 16 17 18 19 20 21 22 23 24 25 26 27 28 29
+[me@linuxbox ~]$ echo "$(cal)"
+February 2008
+....
+```
+
+在第一个实例中，没有引用的命令替换导致命令行包含38个参数。在第二个例子中， 命令行只有一个参数，参数中包括嵌入的空格和换行符。
+
+
+
+如果需要禁止所有的展开，我们要使用单引号。以下例子是无引用，双引号，和单引号的比较结果：
+
+```
+[me@linuxbox ~]$ echo text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER
+text /home/me/ls-output.txt a b foo 4 me
+[me@linuxbox ~]$ echo "text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER"
+text ~/*.txt   {a,b} foo 4 me
+[me@linuxbox ~]$ echo 'text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER'
+text ~/*.txt  {a,b} $(echo foo) $((2+2)) $USER
+```
+
+
+
+有时候我们只想引用单个字符。我们可以在字符之前加上一个反斜杠，在这里叫做转义字符。 经常在双引号中使用转义字符，来有选择地阻止展开。
+
+```
+[me@linuxbox ~]$ echo "The balance for user $USER is: \$5.00"
+The balance for user me is: $5.00
+```
+
+
+
