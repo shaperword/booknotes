@@ -1216,3 +1216,138 @@ source  filename  重新读取运行某个文件
 | Debian  | dpkg --search file_name |
 | Red Hat | rpm -qf file_name       |
 
+
+
+
+
+mount  挂载一个文件系统
+
+umount  卸载一个文件系统
+
+fsck  检查和修复一个文件系统
+
+fdisk  分区表控制器
+
+mkfs  创建文件系统
+
+fdformat  格式化一张软盘
+
+dd  把面向块的数据直接写入设备
+
+md5sum  计算MD5检验码
+
+
+
+
+
+ls /dev 查看计算机的设备
+
+linux存储设备名称
+
+| 模式     | 设备                                                         |
+| -------- | ------------------------------------------------------------ |
+| /dev/fd* | 软盘驱动器                                                   |
+| /dev/hd* | 老系统中的 IDE(PATA)磁盘。典型的主板包含两个 IDE 连接器或者是通道，每个连接器 带有一根缆线，每根缆线上有两个硬盘驱动器连接点。缆线上的第一个驱动器叫做主设备， 第二个叫做从设备。设备名称这样安排，/dev/hdb 是指第一通道上的主设备名；/dev/hdb 是第一通道上的从设备名；/dev/hdc 是第二通道上的主设备名，等等。末尾的数字表示 硬盘驱动器上的分区。例如，/dev/hda1是指系统中第一硬盘驱动器上的第一个分区，而 /dev/hda 则是指整个硬盘驱动器。 |
+| /dev/lp* | 打印机                                                       |
+| /dev/sd* | SCSI 磁盘。在最近的 Linux 系统中，内核把所有类似于磁盘的设备（包括 PATA/SATA 硬盘， 闪存，和 USB 存储设备，比如说可移动的音乐播放器和数码相机）看作 SCSI 磁盘。 剩下的命名系统类似于上述所描述的旧的/dev/hd*命名方案。 |
+| /dev/sr* | 光盘（CD/DVD 读取器和烧写器）                                |
+
+
+
+最基本的网络命令是 ping。这个 ping 命令发送一个特殊的网络数据包，叫做 ICMP ECHO_REQUEST，到 一台指定的主机。大多数接收这个包的网络设备将会回复它，来允许网络连接验证。 
+
+```
+[me@linuxbox ~]$ ping linuxcommand.org
+```
+
+```
+[me@linuxbox ~]$ traceroute slashdot.org //显示从本机到指定主机经过的所有“跳数”的网络流量列表。
+```
+
+netstat 程序被用来检查各种各样的网络设置和统计数据。通过此命令的许多选项，我们 可以看看网络设置中的各种特性。使用“-ie”选项，我们能够查看系统中的网络接口 
+
+```
+[me@linuxbox ~]$ netstat -ie
+eth0    Link encap:Ethernet HWaddr 00:1d:09:9b:99:67
+        inet addr:192.168.1.2 Bcast:192.168.1.255 Mask:255.255.255.0
+        inet6 addr: fe80::21d:9ff:fe9b:9967/64 Scope:Link
+        UP BROADCAST RUNNING MULTICAST MTU:1500 Metric:1
+        RX packets:238488 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:403217 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:100 RX bytes:153098921 (146.0 MB) TX
+        bytes:261035246 (248.9 MB) Memory:fdfc0000-fdfe0000
+
+lo      Link encap:Local Loopback
+        inet addr:127.0.0.1 Mask:255.0.0.0
+...
+```
+
+在上述实例中，我们看到我们的测试系统有两个网络接口。第一个，叫做 eth0，是 以太网接口，和第二个，叫做 lo，是内部回环网络接口，它是一个虚拟接口，系统用它来 “自言自语”。 当执行日常网络诊断时，要查看的重要信息是每个网络接口第四行开头出现的单词 “UP”，说明这个网络接口已经生效，还要查看第二行中 inet addr 字段出现的有效 IP 地址。对于使用 DHCP（动态主机配置协议）的系统，在 这个字段中的一个有效 IP 地址则证明了 DHCP 工作正常。 
+
+使用这个“-r”选项会显示内核的网络路由表。这展示了系统是如何配置网络之间发送数据包的。
+
+```
+[me@linuxbox ~]$ netstat -r
+Kernel IP routing table
+Destination     Gateway     Genmask         Flags    MSS  Window  irtt Iface
+
+192.168.1.0     *           255.255.255.0   U        0    0          0 eth0
+default         192.168.1.1 0.0.0.0         UG       0    0          0 eth0
+```
+
+FTP（它的原始形式）并不是安全的，因为它会以明码形式发送帐号的姓名和密码。这就意味着 这些数据没有加密，任何嗅探网络的人都能看到。由于此种原因，几乎因特网中所有 FTP 服务器 都是匿名的。一个匿名服务器能允许任何人使用注册名“anonymous”和无意义的密码登录系统 。
+
+在下面的例子中，我们将展示一个典型的会话，从匿名 FTP 服务器，其名字是 fileserver， 的/pub/_images/Ubuntu-8.04的目录下，使用 ftp 程序下载一个 Ubuntu 系统映像文件。
+
+```
+[me@linuxbox ~]$ ftp fileserver
+Connected to fileserver.localdomain.
+220 (vsFTPd 2.0.1)
+Name (fileserver:me): anonymous
+331 Please specify the password.
+Password:
+230 Login successful.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> cd pub/cd\_images/Ubuntu-8.04
+250 Directory successfully changed.
+ftp> ls
+200 PORT command successful. Consider using PASV.
+150 Here comes the directory listing.
+-rw-rw-r-- 1 500 500 733079552 Apr 25 03:53 ubuntu-8.04- desktop-i386.iso
+226 Directory send OK.
+ftp> lcd Desktop
+Local directory now /home/me/Desktop
+ftp> get ubuntu-8.04-desktop-i386.iso
+local: ubuntu-8.04-desktop-i386.iso remote: ubuntu-8.04-desktop-
+i386.iso
+200 PORT command successful. Consider using PASV.
+150 Opening BINARY mode data connection for ubuntu-8.04-desktop-
+i386.iso (733079552 bytes).
+226 File send OK.
+733079552 bytes received in 68.56 secs (10441.5 kB/s)
+ftp> bye
+```
+
+| 命令                             | 意思                                                         |
+| -------------------------------- | ------------------------------------------------------------ |
+| ftp fileserver                   | 唤醒 ftp 程序，让它连接到 FTP 服务器，fileserver。           |
+| anonymous                        | 登录名。输入登录名后，将出现一个密码提示。一些服务器将会接受空密码， 其它一些则会要求一个邮件地址形式的密码。如果是这种情况，试着输入 “user@example.com”。 |
+| cd pub/cd_images/Ubuntu-8.04     | 跳转到远端系统中，要下载文件所在的目录下， 注意在大多数匿名的 FTP 服务器中，支持公共下载的文件都能在目录 pub 下找到 |
+| ls                               | 列出远端系统中的目录。                                       |
+| lcd Desktop                      | 跳转到本地系统中的 ~/Desktop 目录下。在实例中，ftp 程序在工作目录 ~ 下被唤醒。 这个命令把工作目录改为 ~/Desktop |
+| get ubuntu-8.04-desktop-i386.iso | 告诉远端系统传送文件到本地。因为本地系统的工作目录 已经更改到了 ~/Desktop，所以文件会被下载到此目录。 |
+| bye                              | 退出远端服务器，结束 ftp 程序会话。也可以使用命令 quit 和 exit。 |
+
+wget   网址   下载对应网址的文件，递归下载，后台下载
+
+ssh servername  链接到远程服务器
+
+scp  servername:XXXX.txt  scp安全复制远程服务器文件到本地
+
+sftp  servername  ftp的替代品
+
+
+
+
+
